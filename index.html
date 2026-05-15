@@ -420,7 +420,7 @@
   <div class="calc-wrap-v2">
     <div class="calc-intro" style="text-align: center;">
       <h2>How big is your lawn?</h2>
-      <p>Trace your lawn on the satellite map below — front yard, back yard, anywhere else you want mowed. Or type your measurements manually.</p>
+      <p>Trace each part of your lawn on the satellite map below — your whole property, in one or more sections. Or type your measurements manually.</p>
     </div>
 
     <div class="calc-tabs">
@@ -442,7 +442,7 @@
       </div>
       <div class="map-status" id="map-status"></div>
       <div class="instructions">
-        <strong>How to use:</strong> 1) Type your address and click <em>Find my house</em>. 2) Click <em>Draw a section</em>, then click each corner of one yard area on the map. 3) <em>Double-click</em> to finish that shape. Repeat for back yard and any other areas.
+        <strong>How to use:</strong> 1) Type your address and click <em>Find my house</em>. 2) Click <em>Draw a section</em>, then click each corner of one area of lawn on the map. 3) <em>Double-click</em> to finish that section. Repeat for any additional sections.
       </div>
       <div class="section-list-mapped" id="mapped-sections"></div>
     </div>
@@ -451,21 +451,21 @@
     <div class="tab-pane hidden" id="tab-manual">
       <div class="manual-grid">
         <div class="calc-section">
-          <label>Front yard</label>
+          <label>Section 1</label>
           <div class="calc-row">
             <input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">
             <input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">
           </div>
         </div>
         <div class="calc-section">
-          <label>Back yard</label>
+          <label>Section 2</label>
           <div class="calc-row">
             <input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">
             <input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">
           </div>
         </div>
       </div>
-      <button class="add-section-btn" onclick="addManualSection()" style="margin-top: 12px;">+ Add another section (L-shape, side yard, etc.)</button>
+      <button class="add-section-btn" onclick="addManualSection()" style="margin-top: 12px;">+ Add another section</button>
       <div class="instructions" style="margin-top: 12px;">
         <strong>Don't know the size?</strong> Walk it off — about 2 of your steps equals 1 yard (3 feet).
       </div>
@@ -567,7 +567,6 @@
   var currentMarkers = [];       // circle markers for current points
   var currentPolyline = null;    // polyline preview
   var sections = [];             // {name, polygon, markers, area, latlngs}
-  var DEFAULT_NAMES = ['Front yard', 'Back yard', 'Side yard', 'Section 4', 'Section 5'];
 
   function initMap() {
     if (typeof L === 'undefined') {
@@ -576,9 +575,11 @@
       return;
     }
     map = L.map('map', { doubleClickZoom: false }).setView([42.95, -85.55], 12); // Grand Rapids area
+    // Esri World Imagery — request native tiles up to zoom 21 where available
+    // (US metro areas like Grand Rapids typically have native zoom 20+)
     satelliteLayer = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }
+      { maxZoom: 22, maxNativeZoom: 21, attribution: 'Imagery © Esri' }
     ).addTo(map);
     drawingLayer = L.layerGroup().addTo(map);
 
@@ -610,7 +611,7 @@
           return;
         }
         map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 20);
-        showStatus('Found! Now click "+ Draw a section" and trace your front yard.');
+        showStatus('Found! Now click "+ Draw a section" and trace your first section of lawn.');
       })
       .catch(function() { showStatus('Address lookup failed. Check your internet and try again.'); });
   }
@@ -652,7 +653,7 @@
     drawingLayer.removeLayer(currentPolyline);
     currentMarkers.forEach(function(m) { drawingLayer.removeLayer(m); });
 
-    var name = DEFAULT_NAMES[sections.length] || ('Section ' + (sections.length + 1));
+    var name = 'Section ' + (sections.length + 1);
     var polygon = L.polygon(currentPoints, {
       color: '#7CB342', weight: 2,
       fillColor: '#7CB342', fillOpacity: 0.35
@@ -666,7 +667,7 @@
     drawingMode = false;
     currentPoints = []; currentMarkers = []; currentPolyline = null;
     document.getElementById('draw-btn').disabled = false;
-    showStatus('Section saved. Click "+ Draw a section" again for back yard, or any other area.');
+    showStatus('Section saved. Click "+ Draw a section" again to add another section, or you\'re done.');
 
     renderMappedSections();
     recalc();
