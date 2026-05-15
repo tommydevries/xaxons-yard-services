@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Xaxon's Yard Services</title>
+<!-- Leaflet (free open-source mapping library, no API key needed) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   :root {
     --green: #7CB342;
@@ -175,6 +178,95 @@
   .upgrade-row strong { color: var(--ink); }
   .upgrade-price { color: var(--green-dark); font-weight: 700; margin-left: 4px; }
   .included-note { font-size: 13px; color: rgba(26,36,25,.6); margin-top: 8px; padding-left: 4px; }
+
+  /* Single-column calculator wrap (the map needs full width) */
+  .calc-wrap-v2 {
+    max-width: 1100px; margin: 0 auto;
+    background: var(--white); border-radius: 28px;
+    padding: 48px; border: 1px solid #e7e3d6;
+  }
+  .calc-tabs {
+    display: flex; gap: 4px; margin: 24px 0 20px;
+    border-bottom: 1px solid #e7e3d6;
+  }
+  .tab-btn {
+    background: transparent; border: none;
+    padding: 12px 18px; font-weight: 600; font-size: 14px;
+    cursor: pointer; color: rgba(26,36,25,.5);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .tab-btn.active { color: var(--ink); border-bottom-color: var(--green); }
+  .tab-pane { display: block; }
+  .tab-pane.hidden { display: none; }
+
+  .map-search {
+    display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .map-search input {
+    flex: 1; min-width: 220px; padding: 12px 16px; font-size: 15px;
+    border: 1px solid #e7e3d6; border-radius: 10px;
+    font-family: inherit; background: var(--cream); color: var(--ink);
+  }
+  .map-search input:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+  .map-search button {
+    padding: 12px 20px; background: var(--ink); color: white;
+    border: none; border-radius: 10px; font-weight: 600;
+    cursor: pointer; font-size: 14px; font-family: inherit;
+  }
+  #map {
+    height: 500px; border-radius: 16px; overflow: hidden;
+    border: 1px solid #e7e3d6;
+    background: #e8e8e8;
+  }
+  .map-toolbar {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .map-action-btn {
+    background: var(--green); color: var(--ink); border: none;
+    padding: 12px 18px; border-radius: 10px; font-weight: 700;
+    cursor: pointer; font-size: 14px; font-family: inherit;
+  }
+  .map-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .map-action-btn.ghost {
+    background: transparent; border: 1px solid #e7e3d6; color: var(--ink); font-weight: 600;
+  }
+  .map-action-btn.danger { color: #aa3a2a; }
+  .instructions {
+    font-size: 13px; color: rgba(26,36,25,.7); margin-top: 14px; line-height: 1.5;
+  }
+  .instructions strong { color: var(--green-dark); }
+  .map-status {
+    background: var(--cream); border-radius: 10px;
+    padding: 10px 14px; margin-top: 12px; font-size: 13px;
+    color: var(--ink); display: none;
+  }
+  .map-status.visible { display: block; }
+
+  .section-list-mapped { margin-top: 14px; }
+  .section-list-mapped .item {
+    display: flex; align-items: center;
+    padding: 10px 14px; background: var(--cream); border-radius: 10px;
+    margin-bottom: 6px; font-size: 14px; gap: 12px;
+  }
+  .section-list-mapped .item .name { font-weight: 600; }
+  .section-list-mapped .item .area-num { color: var(--green-dark); font-weight: 700; margin-left: auto; }
+  .section-list-mapped .item .remove {
+    background: transparent; border: none; cursor: pointer; color: rgba(26,36,25,.5); font-size: 18px; padding: 0 4px;
+  }
+  .section-list-mapped .item .remove:hover { color: #aa3a2a; }
+
+  /* Manual tab - keep existing 2-column form */
+  .manual-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .manual-grid .calc-section { background: var(--cream); padding: 14px; border-radius: 10px; }
+  .manual-grid .calc-section label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: rgba(26,36,25,.6); margin-bottom: 8px; }
+
+  @media (max-width: 800px) {
+    .calc-wrap-v2 { padding: 24px 18px; }
+    #map { height: 400px; }
+    .manual-grid { grid-template-columns: 1fr; }
+  }
   @media (max-width: 800px) {
     .calc-wrap { grid-template-columns: 1fr; padding: 32px 24px; gap: 28px; }
   }
@@ -325,17 +417,39 @@
 </section>
 
 <section class="calc" id="calculator">
-  <div class="calc-wrap">
-    <div class="calc-intro">
+  <div class="calc-wrap-v2">
+    <div class="calc-intro" style="text-align: center;">
       <h2>How big is your lawn?</h2>
-      <p>One visit covers your whole property — front yard and back. Measure each separately and add them as sections below.</p>
-      <div class="calc-tip">
-        <strong>Don't know the size?</strong> Walk it off — about 2 of your steps equals 1 yard (3 feet). Or use Google Maps' "measure distance" tool.
-      </div>
+      <p>Trace your lawn on the satellite map below — front yard, back yard, anywhere else you want mowed. Or type your measurements manually.</p>
     </div>
 
-    <div class="calc-form">
-      <div class="sections-list">
+    <div class="calc-tabs">
+      <button class="tab-btn active" data-tab="map" onclick="switchTab('map')">Trace on satellite map</button>
+      <button class="tab-btn" data-tab="manual" onclick="switchTab('manual')">Type measurements</button>
+    </div>
+
+    <!-- MAP TAB -->
+    <div class="tab-pane" id="tab-map">
+      <div class="map-search">
+        <input type="text" id="addr-input" placeholder="Type your address (e.g. 1601 Fisk Rd SE, Grand Rapids, MI)" onkeydown="if(event.key==='Enter'){event.preventDefault();searchAddress();}">
+        <button onclick="searchAddress()">Find my house</button>
+      </div>
+      <div id="map"></div>
+      <div class="map-toolbar">
+        <button class="map-action-btn" id="draw-btn" onclick="startDrawing()">+ Draw a section</button>
+        <button class="map-action-btn ghost" onclick="undoLastPoint()">Undo last point</button>
+        <button class="map-action-btn ghost danger" onclick="clearAll()">Clear all sections</button>
+      </div>
+      <div class="map-status" id="map-status"></div>
+      <div class="instructions">
+        <strong>How to use:</strong> 1) Type your address and click <em>Find my house</em>. 2) Click <em>Draw a section</em>, then click each corner of one yard area on the map. 3) <em>Double-click</em> to finish that shape. Repeat for back yard and any other areas.
+      </div>
+      <div class="section-list-mapped" id="mapped-sections"></div>
+    </div>
+
+    <!-- MANUAL TAB -->
+    <div class="tab-pane hidden" id="tab-manual">
+      <div class="manual-grid">
         <div class="calc-section">
           <label>Front yard</label>
           <div class="calc-row">
@@ -351,25 +465,29 @@
           </div>
         </div>
       </div>
-      <button class="add-section-btn" onclick="addSection()">+ Add another section (L-shaped yard, side yard, etc.)</button>
-
-      <label class="upgrade-row">
-        <input type="checkbox" id="add-edging" onchange="recalc()">
-        <span>
-          <strong>Add edging</strong> — clean lines along beds, sidewalks, and driveways
-          <span class="upgrade-price">+$4</span>
-        </span>
-      </label>
-      <p class="included-note">Every mow already includes weed whacking and leaf blowing.</p>
-
-      <div class="calc-result">
-        <div class="sqft">Your lawn: <span id="sqft-display">0</span> sq ft</div>
-        <div class="price" id="price-display">$0</div>
-        <div class="disclaimer" id="disclaimer-text">Estimate only. Final price confirmed on first visit.</div>
+      <button class="add-section-btn" onclick="addManualSection()" style="margin-top: 12px;">+ Add another section (L-shape, side yard, etc.)</button>
+      <div class="instructions" style="margin-top: 12px;">
+        <strong>Don't know the size?</strong> Walk it off — about 2 of your steps equals 1 yard (3 feet).
       </div>
-
-      <a class="calc-quote-btn" id="quote-btn" href="mailto:xaxondevries@gmail.com?subject=Free%20quote%20request">Request free quote with this size →</a>
     </div>
+
+    <!-- SHARED: edging + result + quote button -->
+    <label class="upgrade-row" style="margin-top: 24px;">
+      <input type="checkbox" id="add-edging" onchange="recalc()">
+      <span>
+        <strong>Add edging</strong> — clean lines along beds, sidewalks, and driveways
+        <span class="upgrade-price">+$4</span>
+      </span>
+    </label>
+    <p class="included-note">Every mow already includes weed whacking and leaf blowing.</p>
+
+    <div class="calc-result">
+      <div class="sqft">Your lawn: <span id="sqft-display">0</span> sq ft</div>
+      <div class="price" id="price-display">$0</div>
+      <div class="disclaimer" id="disclaimer-text">Estimate only. Final price confirmed on first visit.</div>
+    </div>
+
+    <a class="calc-quote-btn" id="quote-btn" href="mailto:xaxondevries@gmail.com?subject=Free%20quote%20request">Request free quote with this size →</a>
   </div>
 </section>
 
@@ -404,7 +522,7 @@
 <div class="footer">Xaxon's Yard Services</div>
 
 <script>
-  // Pricing tiers — edit these to adjust rates
+  // ===== Pricing config =====
   var EDGING_ADDON = 4;
   var TIERS = [
     { max: 3000,  price: 18 },
@@ -417,21 +535,216 @@
     { max: 16000, price: 50 },
     { max: 22000, price: 65 },
     { max: 30000, price: 80 },
-    { max: Infinity, price: 90 }  // hard cap at $90 per mow
+    { max: Infinity, price: 90 }
   ];
-
   function priceFor(sqft) {
     for (var i = 0; i < TIERS.length; i++) if (sqft <= TIERS[i].max) return TIERS[i].price;
     return TIERS[TIERS.length - 1].price;
   }
 
+  // ===== Tab state =====
+  var activeTab = 'map';
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+    document.getElementById('tab-map').classList.toggle('hidden', tab !== 'map');
+    document.getElementById('tab-manual').classList.toggle('hidden', tab !== 'manual');
+    if (tab === 'map' && map) {
+      // Map needs to recalculate size when shown
+      setTimeout(function() { map.invalidateSize(); }, 100);
+    }
+    recalc();
+  }
+
+  // ===== Map state =====
+  var map = null;
+  var satelliteLayer = null;
+  var drawingLayer = null;       // LayerGroup for all polygons
+  var drawingMode = false;
+  var currentPoints = [];        // [latlng, ...] for polygon being drawn
+  var currentMarkers = [];       // circle markers for current points
+  var currentPolyline = null;    // polyline preview
+  var sections = [];             // {name, polygon, markers, area, latlngs}
+  var DEFAULT_NAMES = ['Front yard', 'Back yard', 'Side yard', 'Section 4', 'Section 5'];
+
+  function initMap() {
+    if (typeof L === 'undefined') {
+      // Leaflet hasn't loaded yet — try again shortly
+      setTimeout(initMap, 200);
+      return;
+    }
+    map = L.map('map', { doubleClickZoom: false }).setView([42.95, -85.55], 12); // Grand Rapids area
+    satelliteLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }
+    ).addTo(map);
+    drawingLayer = L.layerGroup().addTo(map);
+
+    map.on('click', function(e) {
+      if (!drawingMode) return;
+      addPoint(e.latlng);
+    });
+    map.on('dblclick', function(e) {
+      if (!drawingMode) return;
+      finishPolygon();
+    });
+  }
+
+  function showStatus(msg) {
+    var el = document.getElementById('map-status');
+    if (msg) { el.textContent = msg; el.classList.add('visible'); }
+    else { el.classList.remove('visible'); }
+  }
+
+  function searchAddress() {
+    var addr = document.getElementById('addr-input').value.trim();
+    if (!addr) return;
+    showStatus('Looking up address…');
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(addr))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || data.length === 0) {
+          showStatus('Couldn\'t find that address. Try adding city and state.');
+          return;
+        }
+        map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 20);
+        showStatus('Found! Now click "+ Draw a section" and trace your front yard.');
+      })
+      .catch(function() { showStatus('Address lookup failed. Check your internet and try again.'); });
+  }
+
+  function startDrawing() {
+    if (drawingMode) return;
+    drawingMode = true;
+    currentPoints = [];
+    currentMarkers = [];
+    currentPolyline = L.polyline([], { color: '#7CB342', weight: 3, opacity: 0.9 });
+    drawingLayer.addLayer(currentPolyline);
+    document.getElementById('draw-btn').disabled = true;
+    showStatus('Drawing — click each corner of the section. Double-click to finish.');
+  }
+
+  function addPoint(latlng) {
+    currentPoints.push(latlng);
+    currentPolyline.setLatLngs(currentPoints);
+    var m = L.circleMarker(latlng, { radius: 5, color: '#7CB342', fillColor: 'white', fillOpacity: 1, weight: 2 });
+    drawingLayer.addLayer(m);
+    currentMarkers.push(m);
+  }
+
+  function undoLastPoint() {
+    if (!drawingMode || currentPoints.length === 0) return;
+    currentPoints.pop();
+    var m = currentMarkers.pop();
+    drawingLayer.removeLayer(m);
+    currentPolyline.setLatLngs(currentPoints);
+  }
+
+  function finishPolygon() {
+    if (!drawingMode) return;
+    if (currentPoints.length < 3) {
+      showStatus('Need at least 3 corners to make a shape. Keep clicking.');
+      return;
+    }
+    // Replace polyline + markers with a closed polygon
+    drawingLayer.removeLayer(currentPolyline);
+    currentMarkers.forEach(function(m) { drawingLayer.removeLayer(m); });
+
+    var name = DEFAULT_NAMES[sections.length] || ('Section ' + (sections.length + 1));
+    var polygon = L.polygon(currentPoints, {
+      color: '#7CB342', weight: 2,
+      fillColor: '#7CB342', fillOpacity: 0.35
+    });
+    drawingLayer.addLayer(polygon);
+    var area = polygonAreaSqFt(currentPoints);
+    polygon.bindTooltip(name + ': ' + Math.round(area).toLocaleString() + ' sq ft', { permanent: true, direction: 'center', className: 'section-tooltip' });
+
+    sections.push({ name: name, polygon: polygon, area: area });
+
+    drawingMode = false;
+    currentPoints = []; currentMarkers = []; currentPolyline = null;
+    document.getElementById('draw-btn').disabled = false;
+    showStatus('Section saved. Click "+ Draw a section" again for back yard, or any other area.');
+
+    renderMappedSections();
+    recalc();
+  }
+
+  function removeSection(idx) {
+    drawingLayer.removeLayer(sections[idx].polygon);
+    sections.splice(idx, 1);
+    renderMappedSections();
+    recalc();
+  }
+
+  function clearAll() {
+    drawingLayer.clearLayers();
+    sections = [];
+    drawingMode = false;
+    currentPoints = []; currentMarkers = []; currentPolyline = null;
+    document.getElementById('draw-btn').disabled = false;
+    showStatus('All sections cleared.');
+    renderMappedSections();
+    recalc();
+  }
+
+  function renderMappedSections() {
+    var html = '';
+    sections.forEach(function(s, i) {
+      html += '<div class="item">' +
+        '<span class="name">' + s.name + '</span>' +
+        '<span class="area-num">' + Math.round(s.area).toLocaleString() + ' sq ft</span>' +
+        '<button class="remove" onclick="removeSection(' + i + ')" title="Remove">&times;</button>' +
+        '</div>';
+    });
+    document.getElementById('mapped-sections').innerHTML = html;
+  }
+
+  // Spherical-excess polygon area, returns square feet
+  function polygonAreaSqFt(latlngs) {
+    if (latlngs.length < 3) return 0;
+    var R = 6378137; // Earth radius in meters
+    var area = 0;
+    for (var i = 0; i < latlngs.length; i++) {
+      var p1 = latlngs[i];
+      var p2 = latlngs[(i + 1) % latlngs.length];
+      area += (p2.lng - p1.lng) * Math.PI / 180 *
+              (2 + Math.sin(p1.lat * Math.PI / 180) + Math.sin(p2.lat * Math.PI / 180));
+    }
+    area = Math.abs(area * R * R / 2); // sq meters
+    return area * 10.7639; // sq feet
+  }
+
+  // ===== Manual tab =====
+  function addManualSection() {
+    var grid = document.querySelector('#tab-manual .manual-grid');
+    var count = grid.children.length + 1;
+    var div = document.createElement('div');
+    div.className = 'calc-section';
+    div.innerHTML =
+      '<label>Section ' + count + '</label>' +
+      '<div class="calc-row">' +
+        '<input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">' +
+        '<input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">' +
+      '</div>';
+    grid.appendChild(div);
+  }
+
+  // ===== Pricing recalc — reads whichever tab is active =====
   function recalc() {
     var total = 0;
-    document.querySelectorAll('.calc-section').forEach(function(s) {
-      var l = parseFloat(s.querySelector('.length').value) || 0;
-      var w = parseFloat(s.querySelector('.width').value) || 0;
-      total += l * w;
-    });
+    if (activeTab === 'map') {
+      total = sections.reduce(function(sum, s) { return sum + s.area; }, 0);
+    } else {
+      document.querySelectorAll('#tab-manual .calc-section').forEach(function(s) {
+        var l = parseFloat(s.querySelector('.length').value) || 0;
+        var w = parseFloat(s.querySelector('.width').value) || 0;
+        total += l * w;
+      });
+    }
+    total = Math.round(total);
     var addEdging = document.getElementById('add-edging').checked;
     var price = total > 0 ? priceFor(total) + (addEdging ? EDGING_ADDON : 0) : 0;
     var priceText = '$' + price;
@@ -443,13 +756,13 @@
         '. Final price confirmed on first visit.'
       : 'Estimate only. Final price confirmed on first visit.';
 
-    // Pre-fill the email
+    var measuredHow = activeTab === 'map' ? 'satellite trace' : 'manual measurement';
     var emailSubject = total > 0
       ? 'Free quote request — ' + total.toLocaleString() + ' sq ft' + (addEdging ? ' (with edging)' : '')
       : 'Free quote request';
     var emailBody = 'Hi Xaxon,\n\n' +
       (total > 0
-        ? 'My lawn is approximately ' + total.toLocaleString() + ' sq ft.\n' +
+        ? 'My lawn is approximately ' + total.toLocaleString() + ' sq ft (' + measuredHow + ').\n' +
           'Service: Mow' + (addEdging ? ' + edging' : '') + ' (weed whacking + leaf blowing included)\n' +
           'Calculator estimate: ' + priceText + '\n\n'
         : '') +
@@ -459,18 +772,11 @@
       '&body=' + encodeURIComponent(emailBody);
   }
 
-  function addSection() {
-    var list = document.querySelector('.sections-list');
-    var count = list.children.length + 1;
-    var div = document.createElement('div');
-    div.className = 'calc-section';
-    div.innerHTML =
-      '<label>Section ' + count + ' (e.g. side yard)</label>' +
-      '<div class="calc-row">' +
-        '<input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">' +
-        '<input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">' +
-      '</div>';
-    list.appendChild(div);
+  // Init map once Leaflet is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
   }
 </script>
 
