@@ -436,13 +436,14 @@
       </div>
       <div id="map"></div>
       <div class="map-toolbar">
-        <button class="map-action-btn" id="draw-btn" onclick="startDrawing()">+ Draw a section</button>
-        <button class="map-action-btn ghost" onclick="undoLastPoint()">Undo last point</button>
-        <button class="map-action-btn ghost danger" onclick="clearAll()">Clear all sections</button>
+        <button class="map-action-btn" id="draw-btn" onclick="drawBtnClick()">+ Draw a section</button>
+        <button class="map-action-btn ghost" id="undo-btn" onclick="undoLastPoint()" style="display:none;">Undo last point</button>
+        <button class="map-action-btn ghost" id="cancel-btn" onclick="cancelDrawing()" style="display:none;">Cancel</button>
+        <button class="map-action-btn ghost danger" id="clear-btn" onclick="clearAll()">Clear all sections</button>
       </div>
       <div class="map-status" id="map-status"></div>
       <div class="instructions">
-        <strong>How to use:</strong> 1) Type your address and click <em>Find my house</em>. 2) Click <em>Draw a section</em>, then click each corner of one area of lawn on the map. 3) <em>Double-click</em> to finish that section. Repeat for any additional sections.
+        <strong>How to use:</strong> 1) Type your address and tap <em>Find my house</em>. 2) Tap <em>Draw a section</em>, then tap each corner of one area of lawn on the map. 3) Tap <em>Finish this section</em> when you're done with that shape. Repeat for any additional sections.
       </div>
       <div class="section-list-mapped" id="mapped-sections"></div>
     </div>
@@ -617,6 +618,30 @@
       .catch(function() { showStatus('Address lookup failed. Check your internet and try again.'); });
   }
 
+  // The "Draw a section" button doubles as "Finish this section" while drawing
+  function drawBtnClick() {
+    if (drawingMode) finishPolygon();
+    else startDrawing();
+  }
+
+  function setDrawingUI(isDrawing) {
+    var draw = document.getElementById('draw-btn');
+    var undo = document.getElementById('undo-btn');
+    var cancel = document.getElementById('cancel-btn');
+    var clear = document.getElementById('clear-btn');
+    if (isDrawing) {
+      draw.textContent = '✓ Finish this section';
+      undo.style.display = '';
+      cancel.style.display = '';
+      clear.style.display = 'none';
+    } else {
+      draw.textContent = '+ Draw a section';
+      undo.style.display = 'none';
+      cancel.style.display = 'none';
+      clear.style.display = '';
+    }
+  }
+
   function startDrawing() {
     if (drawingMode) return;
     drawingMode = true;
@@ -624,8 +649,18 @@
     currentMarkers = [];
     currentPolyline = L.polyline([], { color: '#7CB342', weight: 3, opacity: 0.9 });
     drawingLayer.addLayer(currentPolyline);
-    document.getElementById('draw-btn').disabled = true;
-    showStatus('Drawing — click each corner of the section. Double-click to finish.');
+    setDrawingUI(true);
+    showStatus('Drawing — tap each corner of the section, then tap "Finish this section". (Or double-click on desktop.)');
+  }
+
+  function cancelDrawing() {
+    if (!drawingMode) return;
+    if (currentPolyline) drawingLayer.removeLayer(currentPolyline);
+    currentMarkers.forEach(function(m) { drawingLayer.removeLayer(m); });
+    drawingMode = false;
+    currentPoints = []; currentMarkers = []; currentPolyline = null;
+    setDrawingUI(false);
+    showStatus('Drawing cancelled.');
   }
 
   function addPoint(latlng) {
@@ -667,8 +702,8 @@
 
     drawingMode = false;
     currentPoints = []; currentMarkers = []; currentPolyline = null;
-    document.getElementById('draw-btn').disabled = false;
-    showStatus('Section saved. Click "+ Draw a section" again to add another section, or you\'re done.');
+    setDrawingUI(false);
+    showStatus('Section saved. Tap "+ Draw a section" again to add another section, or you\'re done.');
 
     renderMappedSections();
     recalc();
@@ -686,7 +721,7 @@
     sections = [];
     drawingMode = false;
     currentPoints = []; currentMarkers = []; currentPolyline = null;
-    document.getElementById('draw-btn').disabled = false;
+    setDrawingUI(false);
     showStatus('All sections cleared.');
     renderMappedSections();
     recalc();
