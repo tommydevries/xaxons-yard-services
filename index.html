@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xaxon's Yard Services</title>
+<style>
+  :root {
+    --green: #7CB342;
+    --green-dark: #4A7C28;
+    --green-deep: #2E4F18;
+    --ink: #1A2419;
+    --cream: #F6F4EC;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--cream); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+
+  /* Top bar */
+  .top {
+    display: flex; align-items: center;
+    padding: 20px 32px;
+  }
+  .top img { height: 44px; width: auto; }
+
+  /* Hero */
+  .hero {
+    padding: 24px 32px 0;
+  }
+  .hero-card {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #1c2616;
+    min-height: 540px;
+    display: flex; align-items: flex-end;
+  }
+  .hero-card .bg {
+    position: absolute; inset: 0;
+    background-image: url("house.jpg");
+    background-size: cover; background-position: center;
+  }
+  .hero-card .scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.7) 100%);
+  }
+  .hero-text {
+    position: relative; padding: 56px; color: var(--white); max-width: 760px;
+  }
+  .hero-tag {
+    display: inline-block; background: var(--green); color: var(--ink);
+    padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; margin-bottom: 18px;
+  }
+  .hero-text h1 {
+    font-size: 64px; line-height: 1.02; font-weight: 800; letter-spacing: -0.02em;
+    margin-bottom: 18px;
+  }
+  .hero-text h1 em {
+    font-style: normal; color: var(--green);
+  }
+  .hero-text p { font-size: 19px; max-width: 560px; opacity: .92; margin-bottom: 28px; }
+  .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--green); color: var(--ink); text-decoration: none;
+    padding: 16px 26px; border-radius: 999px; font-weight: 700; font-size: 16px;
+  }
+  .btn-secondary {
+    background: rgba(255,255,255,.12); backdrop-filter: blur(6px);
+    color: var(--white); text-decoration: none;
+    padding: 16px 26px; border-radius: 999px; font-weight: 600; font-size: 16px;
+    border: 1px solid rgba(255,255,255,.3);
+  }
+
+  /* Intro band */
+  .intro {
+    padding: 64px 32px;
+    text-align: center;
+  }
+  .intro h2 {
+    font-size: 40px; font-weight: 800; letter-spacing: -0.02em; max-width: 780px; margin: 0 auto 16px;
+  }
+  .intro p { font-size: 18px; max-width: 600px; margin: 0 auto; opacity: .8; }
+
+  /* Services grid */
+  .services { padding: 0 32px 64px; }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .svc {
+    background: var(--white); border-radius: 20px; padding: 28px;
+    border: 1px solid #e7e3d6;
+  }
+  .svc .ico {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--green); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px; color: var(--ink);
+  }
+  .svc .ico svg { width: 26px; height: 26px; }
+  .svc h3 { font-size: 19px; margin-bottom: 6px; }
+  .svc p { font-size: 14px; opacity: .7; }
+
+  /* Pricing strip */
+  .pricing {
+    background: var(--ink); color: var(--white);
+    margin: 0 32px; border-radius: 28px;
+    padding: 56px 56px;
+    display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 40px; align-items: center;
+  }
+  .pricing h3 { font-size: 32px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; }
+  .pricing h3 span { color: var(--green); }
+  .price-block { border-left: 2px solid rgba(255,255,255,.2); padding-left: 28px; }
+  .price-block .num { font-size: 40px; font-weight: 800; color: var(--green); line-height: 1; }
+  .price-block .label { font-size: 14px; opacity: .7; margin-top: 6px; }
+  .price-block .starting-at {
+    font-size: 11px; font-weight: 700; color: var(--green);
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px;
+  }
+
+  /* Calculator */
+  .calc { padding: 80px 32px; }
+  .calc-wrap {
+    max-width: 1000px; margin: 0 auto;
+    background: var(--white); border-radius: 28px;
+    padding: 56px; border: 1px solid #e7e3d6;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+  }
+  .calc-intro h2 { font-size: 36px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 14px; }
+  .calc-intro p { opacity: .75; font-size: 16px; margin-bottom: 18px; }
+  .calc-tip {
+    background: var(--cream); border-radius: 12px; padding: 16px 18px;
+    font-size: 14px; opacity: .85;
+  }
+  .calc-tip strong { color: var(--green-dark); }
+  .calc-form label {
+    display: block; font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: rgba(26,36,25,.6); margin-bottom: 6px;
+  }
+  .calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .calc-row input, .calc-row select {
+    width: 100%; padding: 14px; border-radius: 10px;
+    border: 1px solid #e7e3d6; background: var(--cream);
+    font-size: 16px; font-family: inherit; color: var(--ink);
+  }
+  .calc-row input:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+  .add-section-btn {
+    background: transparent; border: 1px dashed #c7c2b3; color: var(--green-dark);
+    padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
+    width: 100%; margin-bottom: 18px;
+  }
+  .calc-result {
+    background: var(--ink); color: white; border-radius: 16px; padding: 24px;
+    margin-top: 18px;
+  }
+  .calc-result .sqft { font-size: 14px; opacity: .7; margin-bottom: 4px; }
+  .calc-result .sqft span { color: white; opacity: 1; font-weight: 700; }
+  .calc-result .price { font-size: 38px; font-weight: 800; color: var(--green); letter-spacing: -.02em; }
+  .calc-result .disclaimer { font-size: 12px; opacity: .6; margin-top: 8px; }
+  .calc-quote-btn {
+    display: block; text-align: center;
+    background: var(--green); color: var(--ink); text-decoration: none;
+    padding: 14px; border-radius: 10px; font-weight: 700; margin-top: 14px;
+  }
+  .upgrade-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--cream); border-radius: 12px; padding: 14px 16px;
+    margin-top: 6px; cursor: pointer; font-size: 14px; line-height: 1.4;
+  }
+  .upgrade-row input[type="checkbox"] {
+    margin-top: 2px; width: 18px; height: 18px; accent-color: var(--green-dark); flex-shrink: 0;
+  }
+  .upgrade-row strong { color: var(--ink); }
+  .upgrade-price { color: var(--green-dark); font-weight: 700; margin-left: 4px; }
+  .included-note { font-size: 13px; color: rgba(26,36,25,.6); margin-top: 8px; padding-left: 4px; }
+  @media (max-width: 800px) {
+    .calc-wrap { grid-template-columns: 1fr; padding: 32px 24px; gap: 28px; }
+  }
+
+  /* Why choose */
+  .why { padding: 80px 32px; text-align: center; }
+  .why h2 { font-size: 36px; font-weight: 800; margin-bottom: 40px; letter-spacing: -.02em; }
+  .why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1100px; margin: 0 auto; }
+  .why-card {
+    background: var(--white); border-radius: 20px; padding: 36px 28px;
+    border: 1px solid #e7e3d6;
+  }
+  .why-card .big { font-size: 28px; font-weight: 800; color: var(--green-dark); margin-bottom: 8px; }
+  .why-card p { opacity: .75; font-size: 15px; }
+
+  /* Footer / contact */
+  .contact {
+    background: var(--green);
+    margin: 0 32px 32px; border-radius: 28px;
+    padding: 72px 56px 40px; position: relative; overflow: hidden;
+  }
+  .contact::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 140px;
+    background-image: url("grass.png"); background-repeat: repeat-x; background-position: center bottom;
+    background-size: auto 140px; opacity: .5;
+  }
+  .contact h2 { font-size: 44px; font-weight: 800; letter-spacing: -.02em; max-width: 600px; margin-bottom: 20px; }
+  .contact .email {
+    background: var(--ink); color: var(--white); display: inline-block;
+    padding: 18px 30px; border-radius: 999px; font-weight: 700; font-size: 18px;
+    text-decoration: none; position: relative; z-index: 1;
+  }
+  .contact .small { margin-top: 14px; font-size: 14px; opacity: .8; position: relative; z-index: 1;}
+  .footer {
+    text-align: center; padding: 28px; font-size: 13px; opacity: .55;
+  }
+
+  /* Mobile */
+  @media (max-width: 800px) {
+    .top, .hero, .services, .why { padding-left: 16px; padding-right: 16px; }
+    .pricing, .contact { margin-left: 16px; margin-right: 16px; padding: 36px 24px; }
+    .hero-text { padding: 32px 24px; }
+    .hero-text h1 { font-size: 40px; }
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing { grid-template-columns: 1fr; gap: 20px; }
+    .price-block { border-left: 0; border-top: 2px solid rgba(255,255,255,.2); padding-left: 0; padding-top: 18px; }
+    .why-grid { grid-template-columns: 1fr; }
+    .contact h2 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <img src="logo.png" alt="Xaxon's Yard Services">
+</div>
+
+<section class="hero">
+  <div class="hero-card">
+    <div class="bg"></div>
+    <div class="scrim"></div>
+    <div class="hero-text">
+      <span class="hero-tag">Local lawn care</span>
+      <h1>Your lawn, looking <em>sharp</em> all summer.</h1>
+      <p>Weed whacking and leaf blowing included with mowing. Edging, planting, and mulch on request.</p>
+      <div class="hero-buttons">
+        <a class="btn-primary" href="mailto:xaxondevries@gmail.com?subject=Free%20quote%20request">Request a free quote</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="intro">
+  <h2>Complete lawn care.</h2>
+  <p>Mowing always includes weed whacking and leaf blowing. Edging, planting, mulch, and weeding available on request.</p>
+</section>
+
+<section class="services" id="services">
+  <div class="services-grid">
+    <div class="svc">
+      <div class="ico">
+        <!-- Lawn mower: body + handle + two wheels + grass tufts -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="14" height="6" rx="1"/>
+          <path d="M17 14 L21 7"/>
+          <circle cx="6" cy="19" r="1.6"/>
+          <circle cx="14" cy="19" r="1.6"/>
+          <path d="M6 11V8 M10 11V8 M14 11V8"/>
+        </svg>
+      </div>
+      <h3>Mowing</h3>
+      <p>Includes weed whacking and leaf blowing. Edging available for $4.</p>
+    </div>
+    <div class="svc">
+      <div class="ico">
+        <!-- Sprout: stem + two leaves + soil line -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21V11"/>
+          <path d="M12 11C12 8 14 6 17 6 17 9 15 11 12 11Z"/>
+          <path d="M12 11C12 8 10 6 7 6 7 9 9 11 12 11Z"/>
+          <line x1="3" y1="21" x2="21" y2="21"/>
+        </svg>
+      </div>
+      <h3>Planting</h3>
+      <p>New flowers, shrubs, or fresh fillers in your beds.</p>
+    </div>
+    <div class="svc">
+      <div class="ico">
+        <!-- Mulch: three wavy stacked layers -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 19C5 17 7 17 9 19S13 21 15 19 19 17 21 19"/>
+          <path d="M3 14C5 12 7 12 9 14S13 16 15 14 19 12 21 14"/>
+          <path d="M5 9C7 7 9 7 11 9S15 11 17 9"/>
+        </svg>
+      </div>
+      <h3>Mulch laying</h3>
+      <p>Fresh mulch spread evenly to keep beds healthy.</p>
+    </div>
+    <div class="svc">
+      <div class="ico">
+        <!-- Uprooted weed: leaves on top, exposed roots on bottom -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 4V14"/>
+          <path d="M12 8C9 8 7 6 7 6"/>
+          <path d="M12 8C15 8 17 6 17 6"/>
+          <path d="M12 14L8 20"/>
+          <path d="M12 14L16 20"/>
+          <path d="M12 14L12 20"/>
+        </svg>
+      </div>
+      <h3>Pulling weeds</h3>
+      <p>Hand-pulled, root and all, so they stay gone longer.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pricing">
+  <h3>Honest <span>neighbor pricing.</span> No surprises.</h3>
+  <div class="price-block">
+    <div class="starting-at">Starting at</div>
+    <div class="num">$18</div>
+    <div class="label">Per mow (whole property)</div>
+  </div>
+  <div class="price-block">
+    <div class="num">$14/hr</div>
+    <div class="label">All other services</div>
+  </div>
+</section>
+
+<section class="calc" id="calculator">
+  <div class="calc-wrap">
+    <div class="calc-intro">
+      <h2>How big is your lawn?</h2>
+      <p>One visit covers your whole property — front yard and back. Measure each separately and add them as sections below.</p>
+      <div class="calc-tip">
+        <strong>Don't know the size?</strong> Walk it off — about 2 of your steps equals 1 yard (3 feet). Or use Google Maps' "measure distance" tool.
+      </div>
+    </div>
+
+    <div class="calc-form">
+      <div class="sections-list">
+        <div class="calc-section">
+          <label>Front yard</label>
+          <div class="calc-row">
+            <input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">
+            <input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">
+          </div>
+        </div>
+        <div class="calc-section">
+          <label>Back yard</label>
+          <div class="calc-row">
+            <input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">
+            <input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">
+          </div>
+        </div>
+      </div>
+      <button class="add-section-btn" onclick="addSection()">+ Add another section (L-shaped yard, side yard, etc.)</button>
+
+      <label class="upgrade-row">
+        <input type="checkbox" id="add-edging" onchange="recalc()">
+        <span>
+          <strong>Add edging</strong> — clean lines along beds, sidewalks, and driveways
+          <span class="upgrade-price">+$4</span>
+        </span>
+      </label>
+      <p class="included-note">Every mow already includes weed whacking and leaf blowing.</p>
+
+      <div class="calc-result">
+        <div class="sqft">Your lawn: <span id="sqft-display">0</span> sq ft</div>
+        <div class="price" id="price-display">$0</div>
+        <div class="disclaimer" id="disclaimer-text">Estimate only. Final price confirmed on first visit.</div>
+      </div>
+
+      <a class="calc-quote-btn" id="quote-btn" href="mailto:xaxondevries@gmail.com?subject=Free%20quote%20request">Request free quote with this size →</a>
+    </div>
+  </div>
+</section>
+
+<section class="why">
+  <h2>Why choose me?</h2>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="big">Local</div>
+      <p>I live right here in the neighborhood. Easy to find me, easy to ask.</p>
+    </div>
+    <div class="why-card">
+      <div class="big">Reliable</div>
+      <p>I show up when I say I will. If the weather changes plans, I'll let you know.</p>
+    </div>
+    <div class="why-card">
+      <div class="big">Affordable</div>
+      <p>Fair, simple prices. Free quote before any work begins.</p>
+    </div>
+    <div class="why-card">
+      <div class="big">Flexible</div>
+      <p>I bring my own equipment, or use yours if you prefer.</p>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <h2>Get a free quote today.</h2>
+  <a class="email" href="mailto:xaxondevries@gmail.com?subject=Free%20quote%20request">xaxondevries@gmail.com</a>
+  <div class="small">Quotes are always free. Email me anytime — quick response.</div>
+</section>
+
+<div class="footer">Xaxon's Yard Services</div>
+
+<script>
+  // Pricing tiers — edit these to adjust rates
+  var EDGING_ADDON = 4;
+  var TIERS = [
+    { max: 3000,  price: 18 },
+    { max: 4500,  price: 21 },
+    { max: 6000,  price: 24 },
+    { max: 7500,  price: 28 },
+    { max: 9000,  price: 32 },
+    { max: 10500, price: 36 },
+    { max: 12000, price: 40 },
+    { max: 16000, price: 50 },
+    { max: 22000, price: 65 },
+    { max: 30000, price: 80 },
+    { max: Infinity, price: 90 }  // hard cap at $90 per mow
+  ];
+
+  function priceFor(sqft) {
+    for (var i = 0; i < TIERS.length; i++) if (sqft <= TIERS[i].max) return TIERS[i].price;
+    return TIERS[TIERS.length - 1].price;
+  }
+
+  function recalc() {
+    var total = 0;
+    document.querySelectorAll('.calc-section').forEach(function(s) {
+      var l = parseFloat(s.querySelector('.length').value) || 0;
+      var w = parseFloat(s.querySelector('.width').value) || 0;
+      total += l * w;
+    });
+    var addEdging = document.getElementById('add-edging').checked;
+    var price = total > 0 ? priceFor(total) + (addEdging ? EDGING_ADDON : 0) : 0;
+    var priceText = '$' + price;
+
+    document.getElementById('sqft-display').textContent = total.toLocaleString();
+    document.getElementById('price-display').textContent = priceText;
+    document.getElementById('disclaimer-text').textContent = total > 0
+      ? 'Includes mow, weed whacking, and leaf blowing' + (addEdging ? ' + edging' : '') +
+        '. Final price confirmed on first visit.'
+      : 'Estimate only. Final price confirmed on first visit.';
+
+    // Pre-fill the email
+    var emailSubject = total > 0
+      ? 'Free quote request — ' + total.toLocaleString() + ' sq ft' + (addEdging ? ' (with edging)' : '')
+      : 'Free quote request';
+    var emailBody = 'Hi Xaxon,\n\n' +
+      (total > 0
+        ? 'My lawn is approximately ' + total.toLocaleString() + ' sq ft.\n' +
+          'Service: Mow' + (addEdging ? ' + edging' : '') + ' (weed whacking + leaf blowing included)\n' +
+          'Calculator estimate: ' + priceText + '\n\n'
+        : '') +
+      'My address: \n\nThanks!';
+    document.getElementById('quote-btn').href =
+      'mailto:xaxondevries@gmail.com?subject=' + encodeURIComponent(emailSubject) +
+      '&body=' + encodeURIComponent(emailBody);
+  }
+
+  function addSection() {
+    var list = document.querySelector('.sections-list');
+    var count = list.children.length + 1;
+    var div = document.createElement('div');
+    div.className = 'calc-section';
+    div.innerHTML =
+      '<label>Section ' + count + ' (e.g. side yard)</label>' +
+      '<div class="calc-row">' +
+        '<input type="number" class="length" placeholder="Length (ft)" oninput="recalc()" min="0">' +
+        '<input type="number" class="width" placeholder="Width (ft)" oninput="recalc()" min="0">' +
+      '</div>';
+    list.appendChild(div);
+  }
+</script>
+
+</body>
+</html>
