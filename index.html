@@ -575,11 +575,12 @@
       return;
     }
     map = L.map('map', { doubleClickZoom: false }).setView([42.95, -85.55], 12); // Grand Rapids area
-    // Esri World Imagery — request native tiles up to zoom 21 where available
-    // (US metro areas like Grand Rapids typically have native zoom 20+)
+    // Esri World Imagery — native tiles top out around zoom 19 in most areas.
+    // We show at zoom 19 by default (crisp, no upscaling) and let users pinch
+    // further to zoom 21 (upscaled but still readable).
     satelliteLayer = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 22, maxNativeZoom: 21, attribution: 'Imagery © Esri' }
+      { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri' }
     ).addTo(map);
     drawingLayer = L.layerGroup().addTo(map);
 
@@ -610,7 +611,7 @@
           showStatus('Couldn\'t find that address. Try adding city and state.');
           return;
         }
-        map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 20);
+        map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 19);
         showStatus('Found! Now click "+ Draw a section" and trace your first section of lawn.');
       })
       .catch(function() { showStatus('Address lookup failed. Check your internet and try again.'); });
